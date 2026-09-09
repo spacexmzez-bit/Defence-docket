@@ -50,6 +50,10 @@
         <button id="tab-notebook-btn" onclick="switchTab('notebook')" class="px-3 py-1.5 rounded text-brand-muted hover:text-white transition whitespace-nowrap">
           Notebook
         </button>
+<button onclick="openSetupModal()" class="px-3 py-1.5 rounded text-brand-gold border border-brand-gold/30 hover:bg-brand-gold/10 transition whitespace-nowrap">
+  ⚙️ Setup Guide
+</button>
+
       </nav>
     </div>
   </header>
@@ -822,5 +826,91 @@
 
     window.onload = initApp;
   </script>
+  <!-- ================= SETUP GUIDE MODAL ================= -->
+  <div id="setup-guide-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-brand-surface border border-brand-border rounded max-w-2xl w-full p-6 space-y-6 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between border-b border-brand-border pb-3">
+        <div>
+          <h3 class="text-brand-gold font-serif text-lg font-bold">How to Set Up Your Simulation</h3>
+          <p class="text-brand-muted text-xs font-mono">Run the defense engine inside Google Gemini in 4 steps.</p>
+        </div>
+        <button onclick="closeSetupModal()" class="text-brand-muted hover:text-white font-mono text-sm px-2 py-1">✕</button>
+      </div>
+
+      <!-- 4 Visual Step Cards -->
+      <div class="space-y-4 font-sans text-xs">
+        
+        <!-- Step 1 -->
+        <div class="bg-brand-dark border border-brand-border rounded p-4 space-y-2">
+          <div class="flex items-center space-x-2">
+            <span class="w-6 h-6 rounded-full bg-brand-gold text-brand-dark font-mono font-bold flex items-center justify-center text-xs">1</span>
+            <h4 class="text-white font-bold text-sm">Create a Gemini Gem (Recommended)</h4>
+          </div>
+          <p class="text-brand-muted leading-relaxed">
+            Open <a href="https://gemini.google.com" target="_blank" class="text-brand-gold underline">Gemini</a>, open the side menu, and tap <strong class="text-slate-200">Gems Manager</strong> $\rightarrow$ <strong class="text-slate-200">New Gem</strong>. (If you don't have Gemini Advanced, you can simply paste the prompt into any fresh chat).
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="bg-brand-dark border border-brand-border rounded p-4 space-y-2">
+          <div class="flex items-center space-x-2">
+            <span class="w-6 h-6 rounded-full bg-brand-gold text-brand-dark font-mono font-bold flex items-center justify-center text-xs">2</span>
+            <h4 class="text-white font-bold text-sm">Paste the System Directive</h4>
+          </div>
+          <p class="text-brand-muted leading-relaxed">
+            Name your Gem <strong class="text-slate-200">"The Defense Docket"</strong>. In the <strong class="text-slate-200">Instructions</strong> box, paste the complete contents of <code class="text-brand-gold font-mono">SYSTEM_PROMPT.md</code> from your repository. Save the Gem.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="bg-brand-dark border border-brand-border rounded p-4 space-y-2">
+          <div class="flex items-center space-x-2">
+            <span class="w-6 h-6 rounded-full bg-brand-gold text-brand-dark font-mono font-bold flex items-center justify-center text-xs">3</span>
+            <h4 class="text-white font-bold text-sm">Initialize the Case (Turn 1)</h4>
+          </div>
+          <p class="text-brand-muted leading-relaxed">
+            Start the conversation by typing:
+          </p>
+          <div class="flex items-center justify-between bg-brand-surface p-2 rounded border border-brand-border font-mono text-xs">
+            <span class="text-emerald-400 font-bold">/start</span>
+            <button onclick="copyCmd('/start', this)" class="px-2 py-1 bg-brand-border text-white rounded hover:bg-brand-gold hover:text-black transition text-[11px]">Copy</button>
+          </div>
+          <p class="text-brand-muted text-[11px]">
+            The engine will present the 6-parameter intake menu. Select your language, presentation style, difficulty, complexity, charge category, and account tier.
+          </p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="bg-brand-dark border border-brand-border rounded p-4 space-y-2">
+          <div class="flex items-center space-x-2">
+            <span class="w-6 h-6 rounded-full bg-brand-gold text-brand-dark font-mono font-bold flex items-center justify-center text-xs">4</span>
+            <h4 class="text-white font-bold text-sm">Sync with this Dashboard</h4>
+          </div>
+          <p class="text-brand-muted leading-relaxed">
+            Once Turn 2 loads (with your case details), type <code class="text-brand-gold font-mono">/generate</code> in Gemini. Copy the JSON block it provides, return to this site's <strong class="text-slate-200">Notebook</strong> tab, click <strong class="text-slate-200">Initialize Case File</strong>, and paste it into <strong class="text-slate-200">Auto-Extract</strong>.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="flex justify-end border-t border-brand-border pt-3">
+        <button onclick="closeSetupModal()" class="px-5 py-2 rounded bg-brand-gold text-brand-dark font-mono font-bold hover:bg-white transition text-xs">
+          Got It, Let's Play
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function openSetupModal() {
+      document.getElementById('setup-guide-modal').classList.remove('hidden');
+    }
+    function closeSetupModal() {
+      document.getElementById('setup-guide-modal').classList.add('hidden');
+    }
+  </script>
+
 </body>
 </html>
