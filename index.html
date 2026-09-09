@@ -141,20 +141,51 @@
           
           <div class="space-y-2">
             <div class="p-2.5 bg-brand-dark border border-brand-border rounded">
-              <span class="text-white font-bold block mb-1">Hearsay (Rule 802)</span>
-              <p class="text-brand-muted text-[11px]">Witness testifying about what someone else said out of court to prove it's true. <br><em class="text-brand-gold">Exception:</em> Excited utterances or dying declarations.</p>
+              <div class="flex justify-between items-baseline mb-1">
+                <span class="text-white font-bold">Hearsay (FRE 802)</span>
+                <span class="text-brand-gold text-[10px] font-mono">Out-of-court statement</span>
+              </div>
+              <p class="text-brand-muted text-[11px]">Witness repeats second-hand information to prove its truth. <br><em class="text-slate-300">Exception:</em> Statements by the defendant, business records, or excited utterances.</p>
             </div>
+
             <div class="p-2.5 bg-brand-dark border border-brand-border rounded">
-              <span class="text-white font-bold block mb-1">Speculation (Rule 602)</span>
-              <p class="text-brand-muted text-[11px]">Witness guessing about things they didn't personally see or experience (e.g., "He must have been angry").</p>
+              <div class="flex justify-between items-baseline mb-1">
+                <span class="text-white font-bold">Leading Question (FRE 611c)</span>
+                <span class="text-rose-400 text-[10px] font-mono">Direct Exam Only</span>
+              </div>
+              <p class="text-brand-muted text-[11px]">The Prosecutor prompts or suggests the answer to their own witness. <br><em class="text-rose-300">Warning:</em> Leading is 100% legal on cross-examination. Do not object there.</p>
             </div>
+
             <div class="p-2.5 bg-brand-dark border border-brand-border rounded">
-              <span class="text-white font-bold block mb-1">Leading Question (Rule 611c)</span>
-              <p class="text-brand-muted text-[11px]">The Prosecutor asks a question that suggests the answer (e.g., "You saw him drop the gun, didn't you?"). Only allowed on cross-examination, NOT direct.</p>
+              <div class="flex justify-between items-baseline mb-1">
+                <span class="text-white font-bold">Speculation / Lack of Foundation (FRE 602/901)</span>
+                <span class="text-brand-gold text-[10px] font-mono">No Personal Knowledge</span>
+              </div>
+              <p class="text-brand-muted text-[11px]">Witness makes assumptions about internal motives or events they didn't see, or an exhibit is shown without chain-of-custody setup.</p>
             </div>
+
             <div class="p-2.5 bg-brand-dark border border-brand-border rounded">
-              <span class="text-white font-bold block mb-1">Assumes Facts Not in Evidence</span>
-              <p class="text-brand-muted text-[11px]">Question contains a premise that hasn't been proven yet (e.g., "Where did you hide the wrench?" when a wrench hasn't been mentioned).</p>
+              <div class="flex justify-between items-baseline mb-1">
+                <span class="text-white font-bold">Improper Character / Propensity (FRE 404b)</span>
+                <span class="text-brand-gold text-[10px] font-mono">Past Misconduct</span>
+              </div>
+              <p class="text-brand-muted text-[11px]">Prosecution introduces prior bad acts to prove defendant has a "criminal nature." Barred unless showing specific intent or plan.</p>
+            </div>
+
+            <div class="p-2.5 bg-brand-dark border border-brand-border rounded">
+              <div class="flex justify-between items-baseline mb-1">
+                <span class="text-white font-bold">Assumes Facts Not in Evidence</span>
+                <span class="text-brand-gold text-[10px] font-mono">Sneaked Premise</span>
+              </div>
+              <p class="text-brand-muted text-[11px]">The question embeds a critical unproven allegation (e.g., "After you dropped the gun, where did you run?").</p>
+            </div>
+
+            <div class="p-2.5 bg-brand-dark border border-brand-border rounded">
+              <div class="flex justify-between items-baseline mb-1">
+                <span class="text-white font-bold">Argumentative / Badgering</span>
+                <span class="text-brand-gold text-[10px] font-mono">Harassment</span>
+              </div>
+              <p class="text-brand-muted text-[11px]">Counsel is arguing, taunting, or refusing to allow the witness to answer rather than eliciting factual testimony.</p>
             </div>
           </div>
         </div>
@@ -579,8 +610,8 @@
         client = document.getElementById('setup-client').value.trim() || 'Jane Doe';
         diff = document.getElementById('setup-diff').value;
         comp = document.getElementById('setup-comp').value;
-        judge = document.getElementById('setup-judge').value.trim() || 'Hon. Vance';
-        da = document.getElementById('setup-da').value.trim() || 'ADA Miller';
+        judge = 'Hon. Vance';
+        da = 'ADA Miller';
         cadence = parseInt(document.getElementById('setup-cadence').value) || 15;
       }
       
@@ -658,13 +689,12 @@
       
       appState.truthHash = input;
       try {
-        // Safe decode for UTF-8 (Arabic) just in case
         appState.truthDecoded = decodeURIComponent(atob(input).split('').map(function(c) {
           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         }).join(''));
       } catch(e) {
         try {
-          appState.truthDecoded = atob(input); // Fallback to raw ascii
+          appState.truthDecoded = atob(input);
         } catch(err) {
           appState.truthDecoded = "[Error: Invalid Base64 String]";
         }
