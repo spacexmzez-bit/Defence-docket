@@ -44,6 +44,9 @@
         <button id="tab-dossier-btn" onclick="switchTab('dossier')" class="px-3 py-1.5 rounded bg-brand-border text-white border border-brand-gold/40 transition whitespace-nowrap">
           Dossier
         </button>
+        <button id="tab-terminal-btn" onclick="switchTab('terminal')" class="px-3 py-1.5 rounded text-brand-muted hover:text-white transition whitespace-nowrap">
+          Trial Terminal
+        </button>
         <button id="tab-manual-btn" onclick="switchTab('manual')" class="px-3 py-1.5 rounded text-brand-muted hover:text-white transition whitespace-nowrap">
           Field Manual
         </button>
@@ -93,6 +96,7 @@
         </p>
       </div>
     </section>
+    
     <!-- How to Play Section -->
     <section class="space-y-4">
       <div class="border-b border-brand-border pb-2 flex justify-between items-end">
@@ -177,6 +181,37 @@
         </div>
       </div>
     </section>
+  </main>
+
+  <!-- ================= TAB: TRIAL TERMINAL ================= -->
+  <main id="tab-terminal" class="hidden max-w-5xl mx-auto px-4 py-6 flex-grow w-full space-y-4">
+    <div class="border border-brand-border bg-brand-surface rounded flex flex-col h-[70vh]">
+      
+      <!-- Terminal Header -->
+      <div class="border-b border-brand-border p-3 flex items-center justify-between bg-brand-dark/50">
+        <div class="flex items-center space-x-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="font-mono text-xs text-brand-gold font-bold uppercase tracking-wider">Live Courtroom Floor</span>
+        </div>
+        <button onclick="clearCourtTranscript()" class="text-[10px] font-mono text-brand-muted hover:text-rose-400">Clear Transcript</button>
+      </div>
+
+      <!-- Dialogue Feed -->
+      <div id="courtroom-feed" class="flex-grow p-4 overflow-y-auto space-y-4 font-mono text-xs leading-relaxed">
+        <div class="text-brand-muted italic">Court is in session. Enter counsel statement or command below.</div>
+      </div>
+
+      <!-- Input Bar -->
+      <div class="border-t border-brand-border p-3 bg-brand-dark flex gap-2">
+        <input id="terminal-input" type="text" placeholder="State your defense argument or command (e.g., /start)..." 
+               class="flex-grow bg-brand-surface border border-brand-border rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-brand-gold/50" 
+               onkeydown="if(event.key === 'Enter') submitCounselTurn()" />
+        <button id="terminal-send-btn" onclick="submitCounselTurn()" class="px-4 py-2 rounded bg-brand-gold text-brand-dark font-bold hover:bg-white transition text-xs font-mono">
+          Send
+        </button>
+      </div>
+
+    </div>
   </main>
 
   <!-- ================= TAB 2: FIELD MANUAL ================= -->
@@ -645,7 +680,7 @@
     };
 
     function switchTab(tabId) {
-      const tabs = ['dossier', 'manual', 'notebook'];
+      const tabs = ['dossier', 'terminal', 'manual', 'notebook'];
       tabs.forEach(t => {
         const view = document.getElementById(`tab-${t}`);
         const btn = document.getElementById(`tab-${t}-btn`);
@@ -968,6 +1003,86 @@
       renderDocket();
       persist();
       closeAddExhibitModal();
+    }
+
+    const WORKER_PROXY_URL = "https://misty-bar-cdf6.spacexmzez.workers.dev/";
+    let courtroomHistory = [];
+
+    async function submitCounselTurn() {
+      const inputEl = document.getElementById('terminal-input');
+      const sendBtn = document.getElementById('terminal-send-btn');
+      const text = inputEl.value.trim();
+
+      if (!text) return;
+
+      // Render Counsel statement
+      appendTranscriptMessage("COUNSEL", text, "text-amber-300");
+      inputEl.value = '';
+      sendBtn.disabled = true;
+      sendBtn.innerText = "Waiting...";
+
+      courtroomHistory.push({
+        role: "user",
+        parts: [{ text: text }]
+      });
+
+      try {
+        const response = await fetch(WORKER_PROXY_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: courtroomHistory
+          })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.error || `HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "The court is silent.";
+
+        courtroomHistory.push({
+          role: "model",
+          parts: [{ text: reply }]
+        });
+
+        // Render Gemini's courtroom response
+        appendTranscriptMessage("COURT", reply, "text-slate-200");
+
+        // Advance turn counter if case is active
+        if (appState.hasActiveCase) {
+          adjustResource('turn', 1);
+        }
+
+      } catch (err) {
+        appendTranscriptMessage("SYSTEM ERROR", err.message, "text-rose-400");
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.innerText = "Send";
+      }
+    }
+
+    function appendTranscriptMessage(sender, text, colorClass) {
+      const feed = document.getElementById('courtroom-feed');
+      const box = document.createElement('div');
+      box.className = "p-2.5 rounded bg-brand-surface border border-brand-border/60 space-y-1";
+      box.innerHTML = `
+        <div class="text-[10px] font-bold ${colorClass} uppercase tracking-wider">${sender}</div>
+        <div class="whitespace-pre-wrap">${escapeHTML(text)}</div>
+      `;
+      feed.appendChild(box);
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function clearCourtTranscript() {
+      courtroomHistory = [];
+      document.getElementById('courtroom-feed').innerHTML = '<div class="text-brand-muted italic">Court is in session. Enter counsel statement or command below.</div>';
     }
 
     window.onload = initApp;
